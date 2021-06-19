@@ -1,0 +1,394 @@
+
+
+
+//********************************************************************************************************
+// Libs to bring
+#include <LiquidCrystal.h> 
+#include <TrueRandom.h>
+//********************************************************************************************************
+//define iquid crystal
+LiquidCrystal lcd(12,11,5,4,3,2);
+//********************************************************************************************************
+ // LCD Const
+ const int switchPin = 6;
+ int switchState = 0;
+ int prevSwitchState = 0;
+ int reply;
+//********************************************************************************************************
+#define menu 6
+#define BUTTON1 6
+#define BUTTON2 9
+#define BUTTON3 10
+#define TILT_SWITCH 16
+int results[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+bool Next = HIGH;
+bool Dice = HIGH;
+bool diceNum = HIGH;
+bool tilt = HIGH;
+String temp;
+char currentPrintOut[10];
+const int menuSize = 8;
+byte menuItems[menuSize];
+int sum = 0;
+int currMenu = 0;
+int rolling = currMenu + 1;
+int dArray = (menuItems[currMenu]);
+int roll = TrueRandom.random(1, (menuItems[currMenu] + 1));
+long randNum;
+
+int diceMulti = 0;
+ 
+ 
+//********************************************************************************************************
+// Set it all up
+void setup() {
+  //Begin Serial Connection
+  Serial.begin(9600);
+  //Begin Display
+  lcd.begin(16,2);
+  menuItems[0] = 2;
+  menuItems[1] = 4;
+  menuItems[2] = 6;
+  menuItems[3] = 8;
+  menuItems[4] = 10;
+  menuItems[5] = 12;
+  menuItems[6] = 20;
+  menuItems[7] = 100;
+
+ 
+  //Begin Display
+lcd.print("Hello");
+  pinMode(BUTTON1, INPUT_PULLUP); // setup button 1
+  pinMode(BUTTON3, INPUT_PULLUP); // setup button 3
+  pinMode(BUTTON2, INPUT_PULLUP); // setup button 2
+  pinMode(TILT_SWITCH, INPUT_PULLUP); // setup button 4
+  pinMode(2, OUTPUT); //led on
+  digitalWrite(2, LOW);
+}
+ 
+//********************************************************************************************************
+// Loop dis pls
+ 
+void loop() {
+ 
+void MenuButton() {
+  Serial.println("menu state has changed");
+  delay(25);
+}
+void TestButton() {
+  Serial.println("button state has changed");
+  delay(25);
+}
+// 
+//  //Menu Logic ***************************************************************
+  if (digitalRead(BUTTON1) != Next) {
+    Next = !Next;
+    delay(50);
+    if (!Next) {
+      //pressed
+      if (currMenu > 0) {
+        currMenu--;
+      }
+      else {
+        currMenu =
+          menuSize - 1;
+      }
+      MenuChanged();
+      Serial.print (currMenu);
+    }
+ 
+  }
+// 
+  //Dice # Logic ***************************************************************
+  if (digitalRead(BUTTON2) != diceNum) {
+    diceNum = !diceNum;
+    delay(50);
+    if (!diceNum) {
+      //pressed
+      if (diceMulti <= 9) {
+        diceMulti++;
+        Serial.println(diceMulti);
+        Serial.print("*****************");
+      }
+      else {
+        diceMulti = 1;
+        Serial.println(diceMulti);
+      }
+      multi();
+    }
+  }
+ 
+  //Dice Logic ***************************************************************
+  if (digitalRead(BUTTON3) != Dice) {
+   Dice = !Dice;
+   delay(150);
+   if (!Dice) {
+     delay(50);
+     diceT->save(menuItems[currMenu]);
+     Serial.print("sending ->Dice Type ");
+     diceRoll();
+     breakfastSerials();
+   }
+   }
+//********************************************************************************************************
+//Button testing
+ 
+void MenuButton() {
+  Serial.println("menu state has changed");
+  delay(25);
+}
+void TestButton() {
+  Serial.println("button state has changed");
+  delay(25);
+}
+ 
+//********************************************************************************************************
+//Menu
+ 
+void MenuChanged() {
+  lcd.clear();
+  temp = String (menuItems[currMenu]);
+  temp.toCharArray (currentPrintOut, 10);
+  lcd.print("D ");
+  lcd.print(currentPrintOut);
+  delay(25);
+}
+ 
+////********************************************************************************************************
+////Multiplier
+ 
+void multi() {
+  MenuChanged();
+  lcd.print(" x ");
+  lcd.print(diceMulti);
+}
+//////********************************************************************************************************
+////Sum Function
+void diceSum() {
+  sum = 0;
+  lcd.print("= ");
+  for (int i = 1; i <= diceMulti; i++) {
+    sum += results[i];
+  }
+  lcd.print(sum);
+}
+ 
+//////********************************************************************************************************
+////Dice Rolls
+ 
+void diceRoll() {
+  int diceRolling = (menuItems[currMenu] + 1);
+  lcd.clear
+  sum = 0;
+ 
+  //dice rolling
+  for (int i = 1; i <= diceMulti; i++) {
+    int roll = TrueRandom.random(1, diceRolling);
+    results[i] = roll;
+  }
+ 
+  switch (diceMulti) {
+    case 1:
+      // display the dice if no multiplier
+      if (results[1] == 1 && menuItems[currMenu] == 20) {
+        lcd.clear; // erase all
+       
+        lcd.print(results[1]); //get rekt
+        diceR->save(results[1]);
+        Serial.print("sending -> Dice Roll ");
+      }
+      else if (results[1] == 20 && menuItems[currMenu] == 20) {
+      lcd.clear; // erase all
+       lcd.print(results[1]); // daaamn yuss
+        diceR->save(results[1]);
+        Serial.print("sending -> Dice Roll ");
+      }
+      else if (results[1] < 10) {
+        //single character number
+        
+        lcd.print(results[1]); // write the roll
+        
+        Serial.print("sending -> Dice Roll ");
+ 
+      }
+      else {
+        // dual character number
+      
+ 
+        lcd.print(results[1]); // write the roll
+        
+        Serial.print("sending -> Dice Roll ");
+      }
+ 
+      lcd.print(); // write to display
+      break;
+ 
+    case 2:
+      Serial.print(diceMulti);
+      
+      for (int i = 1; i <= diceMulti; i++) {
+       lcd.print(results[i]);
+        lcd.print(" ");
+      }
+      diceSum();
+      lcd.print();
+      break;
+ 
+    case 3:
+      Serial.print(diceMulti);
+     
+      for (int i = 1; i <= diceMulti; i++) {
+        lcd.print(results[i]);
+        lcd.print(" ");
+      }
+      diceSum();
+      lcd.print();
+      break;
+ 
+    case 4:
+      Serial.print(diceMulti);
+      
+      for (int i = 1; i <= diceMulti; i++) {
+        lcd.print(results[i]);
+        lcd.print(" ");
+      }
+      diceSum();
+      lcd.print();
+      break;
+ 
+    case 5:
+      Serial.print(diceMulti);
+     
+      for (int i = 1; i <= diceMulti; i++) {
+        lcd.print(results[i]);
+        lcd.print(" ");
+      }
+      diceSum();
+      lcd.print();
+      break;
+ 
+    case 6:
+      Serial.print(diceMulti);
+      
+      for (int i = 1; i <= 5; i++) {
+        lcd.print(results[i]);
+        lcd.print(" ");
+      }
+    
+      for (int i = 5; i < diceMulti; i++) {
+        lcd.print(results[i]);
+        lcd.print(" ");
+      }
+      diceSum();
+      lcd.print();
+      break;
+ 
+    case 7:
+      Serial.print(diceMulti);
+     
+      for (int i = 1; i <= 5; i++) {
+        lcd.print(results[i]);
+        lcd.print(" ");
+      }
+     
+      for (int i = 5; i < diceMulti; i++) {
+        lcd.print(results[i]);
+        lcd.print(" ");
+      }
+      diceSum();
+      lcd.print();
+      break;
+ 
+    case 8:
+      Serial.print(diceMulti);
+      
+      for (int i = 1; i <= 5; i++) {
+        lcd.print(results[i]);
+      lcd.print(" ");
+      }
+  
+      for (int i = 5; i < diceMulti; i++) {
+        lcd.print(results[i]);
+        lcd.print(" ");
+      }
+      diceSum();
+      lcd.print();
+      break;
+ 
+    case 9:
+      Serial.print(diceMulti);
+      
+      for (int i = 1; i <= 5; i++) {
+       lcd.print(results[i]);
+       lcd.print(" ");
+      }
+      
+      for (int i = 5; i < diceMulti; i++) {
+      lcd.print(results[i]);
+        lcd.print(" ");
+      }
+      diceSum();
+      lcd.print();
+      break;
+    case 10:
+      Serial.print(diceMulti);
+    
+      for (int i = 1; i <= 5; i++) {
+        lcd.print(results[i]);
+       lcd.print(" ");
+      }
+      
+      for (int i = 5; i < diceMulti; i++) {
+        lcd.print(results[i]);
+        lcd.print(" ");
+      }
+      diceSum();
+
+      break;
+ 
+  }
+}
+ 
+ 
+ 
+////********************************************************************************************************
+//Random Number
+ 
+void randRoll() {
+  randNum = random(1, menuItems[currMenu]+1
+  );
+  
+  display.println(randNum ); // write the roll
+}
+ 
+////********************************************************************************************************
+////Dice Draws
+// 
+//void dicePic() {
+//  for (int i = 0; i < 3; i++) {
+//    int diceDelay = 100;
+//    diceDraw();
+//    randRoll();
+//    display.display();
+//    delay(diceDelay);
+//    ClearDice();
+//    randRoll();
+//    display.display();
+//    diceDrawr();
+//    display.display();
+//    delay(diceDelay);
+//    ClearDice();
+//    diceDraw();
+//  }
+//}
+////********************************************************************************************************
+//Serial Prints Pls
+ 
+void breakfastSerials() {
+  Serial.println("roll");
+  Serial.println(roll);
+  Serial.println("currMenu");
+  Serial.println(currMenu);
+  Serial.println("diceArray");
+  Serial.println(dArray);
+}
